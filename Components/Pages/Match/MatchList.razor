@@ -1,0 +1,189 @@
+﻿@page "/admin/match"
+
+
+@attribute [Authorize]
+@rendermode InteractiveServer
+<BSContainer class="content pb-5">
+    <RadzenCard>
+        <h3>Matcher</h3>
+@if (matches == null)
+{
+    <p>Henter ...</p>
+}
+else
+{
+    <RadzenDataGrid @ref="matchGrid" AllowAlternatingRows="false" EditMode="DataGridEditMode.Single"
+                    Data="@matches" TItem="MatchViewModel" RowUpdate="@OnUpdateRow" 
+                    RowCreate="@OnCreateRow">
+        <HeaderTemplate>
+            <RadzenStack AlignItems="AlignItems.End">
+                <RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle" 
+                    Text="Ny match" Click="@InsertRow" Disabled="@Editing" />
+            </RadzenStack>
+        </HeaderTemplate>
+        <Columns>
+            <RadzenDataGridColumn Property="@nameof(MatchViewModel.MatchDate)" CssClass="col-md-auto" Title="Dato" Frozen="true">
+                <Template Context="match">
+                    @match.MatchDate.ToString("dd MMM, yyyy")
+                </Template>
+                <EditTemplate Context="match">
+                    <RadzenDatePicker Style="width: 100%;" Name="MatchDate" DateFormat="dd-MM-yyyy" @bind-Value="match.MatchDate" />
+                    <RadzenRequiredValidator Text="Skal angives" Component="matchDate" Popup="true" />
+                </EditTemplate>
+            </RadzenDataGridColumn>
+
+            <RadzenDataGridColumn Property="@nameof(MatchViewModel.CourseId)" Title="Bane" TextAlign="TextAlign.Center" CssClass="col">
+                <Template Context="match">
+                    @match.CourseName
+                </Template>
+                <EditTemplate Context="match">
+                    <RadzenDropDown @bind-Value="match.CourseId" AllowClear="true" Placeholder="Vælg bane"
+                                    Data="@courses" Style="width: 100%;" 
+                                    TextProperty="CourseName" ValueProperty="CourseId" Name="CourseId">
+                    </RadzenDropDown>
+                </EditTemplate>
+            </RadzenDataGridColumn>
+
+            <RadzenDataGridColumn Context="match" Width="160px" TextAlign="TextAlign.Right" Frozen="true" FrozenPosition="FrozenColumnPosition.Right">
+                <Template Context="match">
+                    <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="Radzen.ButtonSize.Medium" Click="@(args => EditRow(match))" @onclick:stopPropagation="true">
+                    </RadzenButton>
+                    <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Variant="Variant.Flat" Shade="Shade.Lighter" Size="Radzen.ButtonSize.Medium" class="rz-my-1 rz-ms-1" Click="@(args => DeleteRow(match))" @onclick:stopPropagation="true">
+                    </RadzenButton>
+                </Template>
+                <EditTemplate Context="match">
+                    <RadzenButton Icon="check" ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat" Size="Radzen.ButtonSize.Medium" Click="@((args) => SaveRow(match))" aria-label="Save">
+                    </RadzenButton>
+                    <RadzenButton Icon="close" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="Radzen.ButtonSize.Medium" class="rz-my-1 rz-ms-1" Click="@((args) => CancelEdit(match))" aria-label="Cancel">
+                    </RadzenButton>
+                    <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Variant="Variant.Flat" Shade="Shade.Lighter" Size="Radzen.ButtonSize.Medium" class="rz-my-1 rz-ms-1" Click="@(args => DeleteRow(match))" aria-label="Delete">
+                    </RadzenButton>
+                </EditTemplate>
+            </RadzenDataGridColumn>
+        </Columns>
+    </RadzenDataGrid>
+}
+    </RadzenCard>
+</BSContainer>
+
+<ConfirmDialog @ref="dialog" />
+
+@code
+{
+    RadzenDataGrid<MatchViewModel> matchGrid;
+    private ConfirmDialog dialog = default!;
+
+    [Inject] private IRepository _repo { get; set; }
+    public IEnumerable<MatchViewModel> matches { get; set; }
+    public List<MatchViewModel> persistedMatches { get; set; }
+    public IEnumerable<CourseModel> courses { get; set; }
+    private TournamentModel tournament { get; set; }
+
+    public bool Editing { get; set; } = false;
+
+    [Inject] public required ToastService ToastService { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        courses = await _repo.GetAllCourses();
+        tournament = await _repo.GetAciveTournament();
+        await LoadData();
+    }
+
+    #region Grid events
+
+    async Task OnUpdateRow(MatchViewModel match)
+    {
+        await SaveRow(match);
+    }
+    async void OnCreateRow(MatchViewModel match)
+    {
+        //await UpdateRow(match);
+        throw new NotImplementedException("OnCreateRow called");
+    }
+
+    async Task EditRow(MatchViewModel match)
+    {
+        matches = persistedMatches;
+        await matchGrid.EditRow(match);
+        Editing = true;
+    }
+    async Task SaveRow(MatchViewModel match)
+    {
+        MatchModel model = new()
+        {
+            MatchId = match.MatchId,
+            CourseId = match.CourseId,
+            MatchDate = match.MatchDate,
+            TournamentId = tournament.TournamentId
+        };
+        try { 
+            await _repo.UpsertMatch(model);
+            ToastService.Notify(new(ToastType.Success, "Matchen er opdateret"));
+            await LoadData();
+        }
+        catch(Exception ex)
+        {
+            ToastService.Notify(new(ToastType.Warning, "Der opstod en fejl"));
+            matchGrid.CancelEditRow(match);
+        }
+        await matchGrid.Reload();
+        Editing = false;
+    }
+    async Task DeleteRow(MatchViewModel match)
+    {
+        var options = new ConfirmDialogOptions { Size = DialogSize.Small };
+
+        var confirmation = await dialog.ShowAsync(
+            title: "Hva sååå!",
+            message1: "Skal den slettes?",
+            confirmDialogOptions: options);
+
+        if (!confirmation)
+        {
+            return;
+        }
+        try
+        {
+            await _repo.DeleteMatch(match.MatchId);
+            ToastService.Notify(new(ToastType.Success, "Matchen er slettet"));
+            var matchToRemove = persistedMatches.FirstOrDefault(m => m.MatchId == match.MatchId);
+            if (matchToRemove != null)
+            {
+                persistedMatches.Remove(matchToRemove);
+                matches = persistedMatches;
+            }
+        }
+        catch (Exception ex)
+        {
+            matchGrid.CancelEditRow(match);
+        }
+        await matchGrid.Reload();
+    }
+    async Task InsertRow()
+    {
+        var match = new MatchViewModel();
+        await matchGrid.InsertRow(match);
+        Editing = true;
+    }
+    void CancelEdit(MatchViewModel match)
+    {
+        matchGrid.CancelEditRow(match);
+        Editing = false;
+    }
+    #endregion
+
+    protected async Task LoadData()
+    {
+        try
+        {
+            matches = await _repo.GetAllMatches();
+            persistedMatches = matches.ToList();
+        }
+        catch (Exception ex)
+        {
+            throw;
+        }
+    }
+}

@@ -1,0 +1,133 @@
+﻿@page "/uploadimage"
+@inject FileService UploadService
+@rendermode InteractiveServer
+
+
+<BSContainer class="content pb-5">
+    <RadzenTemplateForm TItem="FileStoreModel" Data=@_image>
+
+    <RadzenCard>
+        <h3>Upload billede til slide show</h3>
+
+        @if (!string.IsNullOrEmpty(ResultMessage))
+        {
+            <div style="color: green; margin-top: 20px;">
+                <p>@ResultMessage</p>
+            </div>
+        }
+        <div class="row mb-3">
+            <div class="col-md-3">
+                <RadzenLabel Text="Navn" Component="Name" />
+            </div>
+            <div class="col-md-6">
+                <RadzenTextBox style="display: block" Name="Title" @bind-Value="@_image!.Name" class="w-100" />
+                <RadzenRequiredValidator Component="Title" Text="Title is required" Style="position: absolute" />
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-md-3">
+                <RadzenLabel Text="Text" Component="Text1" />
+            </div>
+            <div class="col-md-6">
+                <RadzenTextBox style="display: block" Name="Text1" @bind-Value="@_image!.Text1" class="w-100" />
+                <RadzenRequiredValidator Component="Title" Text="Lidt tekst skal der være" Style="position: absolute" />
+            </div>
+                <div class="col-mm-offset-3 col-md-6">
+                <RadzenTextBox style="display: block" Name="Text2" @bind-Value="@_image!.Text2" class="w-100" />
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <InputFile id="fileUpload" class="form-control" OnChange="@OnInputFileChanged" accept="image/*" />
+        </div>
+
+        <div class="mt-3">
+            <RadzenText>Preview</RadzenText>
+            <img src="@uploadedImageSrc" class="img-thumbnail" alt="Preview" style="max-width: 100%; height: auto;" />
+            <RadzenButton class="mt-2" Click="UploadFile">Upload</RadzenButton>
+        </div>
+        </RadzenCard>
+    </RadzenTemplateForm>
+        
+</BSContainer>
+
+@code {
+    private string Description { get; set; } = string.Empty;
+    private IBrowserFile SelectedFile { get; set; }
+    private string ResultMessage { get; set; } = string.Empty;
+    [Inject] private IRepository _repo { get; set; }
+    [Inject] public required ToastService ToastService { get; set; }
+
+    private IBrowserFile file;
+    private string uploadedImageSrc;
+    private FileStoreModel? _image { get; set; } = default!;
+
+    protected override async void OnInitialized()
+    {
+        _image = new FileStoreModel();
+    }
+
+    private async Task OnInputFileChanged(InputFileChangeEventArgs e)
+    {
+        file = e.File;
+        if (file != null)
+        {
+            SelectedFile = e.File; 
+            uploadedImageSrc = await ToImageSrcAsync(file);
+            StateHasChanged();
+        }
+    }
+
+    private async Task<string> ToImageSrcAsync(IBrowserFile file)
+    {
+        var maxAllowedSize = 10 * 1024 * 1024;
+        var resizedImageFile = await file.RequestImageFileAsync("image/png", 640, 480);
+        var buffer = new byte[resizedImageFile.Size];
+        await resizedImageFile.OpenReadStream(maxAllowedSize).ReadAsync(buffer);
+        return $"data:image/png;base64,{Convert.ToBase64String(buffer)}";
+    }
+
+    private async Task UploadFile()
+    {
+        if (file == null) return;
+
+        try
+        {
+            var formFile = new FormFile(
+                SelectedFile.OpenReadStream(),
+                0,
+                SelectedFile.Size,
+                SelectedFile.Name,
+                SelectedFile.Name);
+
+            var fileName = await UploadService.UploadFileAsync(formFile, Description);
+            ResultMessage = $"File uploaded successfully! File Name: {fileName}";
+
+            await _repo.UpsertFileStoreAsync(_image);
+            file = null;
+        }
+        catch (Exception ex)
+        {
+            ToastService.Notify(new(ToastType.Warning, "Der opstod en fejl"));
+        }
+    }
+
+    // private async Task UpdateLogos()
+    // {
+    //     logos = await FileService.GetLogoImages();
+    //     StateHasChanged();
+    // }
+
+    // private async void DeleteImage(int id)
+    // {
+    //     await FileService.DeleteImage(id);
+    //     await UpdateLogos();
+    // }
+
+    // private async void ExportImage(int id, string fileName)
+    // {
+    //     await FileService.ExportLogo(id, fileName);
+    // }
+
+}

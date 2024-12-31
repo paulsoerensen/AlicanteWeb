@@ -1,0 +1,252 @@
+﻿@page "/admin/result"
+@rendermode InteractiveServer
+@attribute [Authorize]
+
+<BSContainer class="content pb-5">
+    <RadzenCard>
+@if (matches != null)
+{
+    <RadzenCard Variant="Variant.Flat">
+        <RadzenText TextStyle="TextStyle.H6" TagName="TagName.H3">Matcher</RadzenText>
+        <RadzenDropDown Style="width: 100%; max-width: 300px;" TValue="int" @bind-Value="matchId"
+            Placeholder="Vælg match" AllowFiltering="true" Data="@(matches)" 
+            TextProperty="@nameof(MatchViewModel.MatchText)" 
+            ValueProperty="@nameof(MatchViewModel.MatchId)" 
+            InputAttributes="@(new Dictionary<string,object>(){ { "aria-label", "Vælg match" }})"
+            Change="@((value) => MatchChanged((int)value))" />
+    </RadzenCard>
+}
+
+<RadzenDataGrid @ref="resultGrid" AllowAlternatingRows="false" EditMode="DataGridEditMode.Single"
+                Data="@results" TItem="ResultViewModel" RowUpdate="@OnUpdateRow" 
+                RowCreate="@OnCreateRow">
+    <HeaderTemplate>
+        <RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle" Text="Nyt resultat" Click="@InsertRow" Disabled="@(Editing || matchId == 0)" />
+    </HeaderTemplate>
+
+    <Columns>
+        <RadzenDataGridColumn Property="@nameof(ResultViewModel.PlayerId)" Title="Spiller" TextAlign="TextAlign.Center" CssClass="col3">
+            <Template Context="result">
+                @result.PlayerName
+            </Template>
+            <EditTemplate Context="result">
+                <RadzenDropDown @bind-Value="result.PlayerId" AllowClear="true" Placeholder="Vælg spiller"
+                                Change="@((value) => PlayerChanged((int)value))"
+                                Data="@players" Style="width: 100%;"
+                                TextProperty="PlayerName" ValueProperty="PlayerId" Name="PlayerId">
+                </RadzenDropDown>
+            </EditTemplate>
+        </RadzenDataGridColumn>
+
+        <RadzenDataGridColumn Property="@nameof(ResultViewModel.Hcp)" Title="Hcp" TextAlign="TextAlign.Center" CssClass="col">
+            <Template Context="result">
+                @result.Hcp
+            </Template>
+            <EditTemplate Context="result">
+                <RadzenNumeric @bind-Value="result.Hcp" Style="width:100%" InputAttributes="@(new Dictionary<string,object>(){ { "aria-label", "Evt. ret" }})" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+
+        <RadzenDataGridColumn Property="@nameof(ResultViewModel.Score)" Title="Score" TextAlign="TextAlign.Center" CssClass="col">
+            <Template Context="result">
+                @result.Score
+            </Template>
+            <EditTemplate Context="result">
+                <RadzenNumeric @bind-Value="result.Score" Style="width:100%" InputAttributes="@(new Dictionary<string,object>(){ { "aria-label", "Brutto" }})" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+
+        <RadzenDataGridColumn Property="@nameof(ResultViewModel.Birdies)" Title="Birdies" TextAlign="TextAlign.Center" CssClass="col">
+            <Template Context="result">
+                @result.Birdies
+            </Template>
+            <EditTemplate Context="result">
+                <RadzenNumeric @bind-Value="result.Birdies" Style="width:100%" InputAttributes="@(new Dictionary<string,object>(){ { "aria-label", "Brutto" }})" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+
+        <RadzenDataGridColumn Property="@nameof(ResultViewModel.Par3)" Title="Par 3" TextAlign="TextAlign.Center" CssClass="col">
+            <Template Context="result">
+                @result.Par3
+            </Template>
+            <EditTemplate Context="result">
+                <RadzenNumeric @bind-Value="result.Par3" Style="width:100%" InputAttributes="@(new Dictionary<string,object>(){ { "aria-label", "Total på par 3" }})" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+
+        <RadzenDataGridColumn Context="result" Width="160px" TextAlign="TextAlign.Right" Frozen="true" FrozenPosition="FrozenColumnPosition.Right">
+            <Template Context="result">
+                <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="Radzen.ButtonSize.Medium" Click="@(args => EditRow(result))" @onclick:stopPropagation="true">
+                </RadzenButton>
+                <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Variant="Variant.Flat" Shade="Shade.Lighter" Size="Radzen.ButtonSize.Medium" class="rz-my-1 rz-ms-1" Click="@(args => DeleteRow(result))" @onclick:stopPropagation="true">
+                </RadzenButton>
+            </Template>
+            <EditTemplate Context="result">
+                <RadzenButton Icon="check" ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat" Size="Radzen.ButtonSize.Medium" Click="@((args) => SaveRow(result))" aria-label="Save">
+                </RadzenButton>
+                <RadzenButton Icon="close" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="Radzen.ButtonSize.Medium" class="rz-my-1 rz-ms-1" Click="@((args) => CancelEdit(result))" aria-label="Cancel">
+                </RadzenButton>
+                <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Variant="Variant.Flat" Shade="Shade.Lighter" Size="Radzen.ButtonSize.Medium" class="rz-my-1 rz-ms-1" Click="@(args => DeleteRow(result))" aria-label="Delete">
+                </RadzenButton>
+            </EditTemplate>
+        </RadzenDataGridColumn>
+    </Columns>
+</RadzenDataGrid>
+    </RadzenCard>
+</BSContainer>
+<AppModal/>
+<ConfirmDialog @ref="dialog" />
+
+@code
+{
+    public int matchId { get; set; } = 0;
+
+    RadzenDataGrid<ResultViewModel> resultGrid;
+    private ConfirmDialog dialog = default!;
+
+    [Inject] private IRepository _repo { get; set; }
+
+    public IEnumerable<ResultViewModel> results { get; set; }
+    public IEnumerable<PlayerViewModel> players { get; set; }
+    public IEnumerable<MatchViewModel> matches { get; set; }
+
+    protected ResultViewModel insertedRow;
+
+    public bool Editing { get; set; } = false;
+
+    [Inject] public required ToastService ToastService { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        matches = await _repo.GetAllMatches();
+        ToastService.Notify(new(ToastType.Success, "called"));
+    }
+
+    #region Grid events
+
+    async Task OnUpdateRow(ResultViewModel result)
+    {
+        await SaveRow(result);
+    }
+    async void OnCreateRow(ResultViewModel result)
+    {
+        //await UpdateRow(result);
+        throw new NotImplementedException("OnCreateRow called");
+    }
+
+    async Task EditRow(ResultViewModel result)
+    {
+        await resultGrid.EditRow(result);
+        Editing = true;
+    }
+    async Task SaveRow(ResultViewModel result)
+    {
+        ResultModel model = new()
+        {
+            MatchId = matchId,
+            PlayerId = result.PlayerId,
+            Birdies = result.Birdies,
+            Hcp = result.Hcp,
+            Par3 = result.Par3,
+            Score = result.Score
+        };
+        try
+        {
+            var res = await _repo.UpsertResult(model);
+            await LoadResult();
+            await LoadPlayers();
+            ToastService.Notify(new(ToastType.Success, "Resultat er opdateret"));
+        }
+        catch (Exception)
+        {
+            resultGrid.CancelEditRow(result);
+            ToastService.Notify(new(ToastType.Warning, "Der opstod en fejl"));
+        }
+        await resultGrid.Reload();
+        Editing = false;
+
+    }
+    async Task DeleteRow(ResultViewModel result)
+    {
+        var options = new ConfirmDialogOptions { Size = DialogSize.Small };
+
+        var confirmation = await dialog.ShowAsync(
+            title: "Hva sååå!",
+            message1: "Skal den slettes?",
+            confirmDialogOptions: options);
+
+        if (!confirmation)
+        {
+            return;
+        }
+        try
+        {
+            int i = await _repo.DeleteResult(result.ResultId);
+            ToastService.Notify(new(ToastType.Success, "Resultatet er slettet"));
+            await LoadResult();
+        }
+        catch (Exception ex)
+        {
+            resultGrid.CancelEditRow(result);
+            ToastService.Notify(new(ToastType.Warning, ex.Message));
+        }
+        await resultGrid.Reload();
+    }
+    async Task InsertRow()
+    {
+        insertedRow = new ResultViewModel();
+        await resultGrid.InsertRow(insertedRow);
+        Editing = true;
+    }
+    void CancelEdit(ResultViewModel result)
+    {
+        resultGrid.CancelEditRow(result);
+        Editing = false;
+    }
+    #endregion
+
+    private async Task MatchChanged(int id)
+    {
+        matchId = id;
+
+        // Cast the value to the appropriate type (if needed)
+        await LoadResult();
+        await LoadPlayers();
+        StateHasChanged();
+    }
+    private void PlayerChanged(int playerId)
+    {
+        // Cast the value to the appropriate type (if needed)
+
+        PlayerViewModel? model = players.SingleOrDefault(p => p.PlayerId == playerId);
+        insertedRow.Hcp = model!.Hcp;
+    }
+    private async Task LoadPlayers()
+    {
+        try
+        {
+            players = await _repo.GetPlayersForMatch(matchId);
+        }
+        catch (Exception)
+        {
+
+            throw;
+        }
+    }
+    protected async Task LoadResult()
+    {
+        try
+        {
+            results = await _repo.GetResults(matchId);
+        }
+        catch (Exception)
+        {
+
+            throw;
+        }
+
+    }
+
+}
+

@@ -1,0 +1,61 @@
+﻿@implements IDisposable
+
+@inject NavigationManager NavigationManager
+
+<nav class="navbar navbar-expand-lg bg-warning shadow-lg">
+    <div class="container">
+        @if (ActiveTournament == null) 
+        {
+            <a href="#" class="navbar-brand"><span class="text-danger">Turnering</span></a>
+        } 
+        else
+        {
+            <a href="#" class="navbar-brand">@ActiveTournament.TournamentName<span class="text-danger"></span></a>
+        }
+    </div>
+</nav>
+
+@code {
+    [Inject] private IRepository _repo { get; set; }
+    public IEnumerable<MatchHeader> matches { get; set; }
+    public TournamentModel ActiveTournament { get; set; }
+
+    private string? currentUrl;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        ActiveTournament = await _repo.GetAciveTournament();
+        if (ActiveTournament == null)
+        {
+            return;
+        }
+        var results = await _repo.TournamentResult(ActiveTournament.TournamentId);
+        if (results != null)
+        {
+            matches = results
+                .GroupBy(m => new { m.MatchDate, m.CourseName })
+                .OrderBy(g => g.Min(m => m.MatchRank))
+                .Select(g => new MatchHeader
+                    {
+                        MatchId = g.First().MatchId,
+                        MatchDate = g.Key.MatchDate,
+                        CourseName = g.Key.CourseName
+                    }).ToList();
+        }
+        currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+        NavigationManager.LocationChanged += OnLocationChanged;
+    }
+    
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        currentUrl = NavigationManager.ToBaseRelativePath(e.Location);
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        NavigationManager.LocationChanged -= OnLocationChanged;
+    }    
+}
