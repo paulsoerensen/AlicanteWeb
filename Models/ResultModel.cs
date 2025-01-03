@@ -9,5 +9,6 @@
         public int Score { get; set; }
         public int Birdies { get; set; }
         public int Par3 { get; set; }
+        public decimal Price { get; set; } = 0.0m;
     }
 }

@@ -17,6 +17,7 @@
         public int Score { get; set; }
         public int Birdies { get; set; }
         public int Par3 { get; set; }
+        public decimal Price { get; set; } = 0.0m;
         public int PlayerId { get; set; } = 0;
         public string PlayerName { get; set; }
         public decimal HcpIndex { get; set; }

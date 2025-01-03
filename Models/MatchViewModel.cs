@@ -5,6 +5,7 @@
         public int TournamentId { get; set; }
         public string TournamentName { get; set; }
         public bool Active { get; set; }
+        public bool Published { get; set; }
         public int MatchId { get; set; }
         public DateTime MatchDate { get; set; }
         public int CourseId { get; set; }

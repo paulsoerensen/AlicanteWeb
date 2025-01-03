@@ -39,8 +39,8 @@ namespace AlicanteWeb.Data
         {
             using (IDbConnection db = CreateConnection())
             {
-                var results = await db.QueryAsync<CourseModel>(courseSelect);
-                return results;
+                var courses = await db.QueryAsync<CourseModel>(courseSelect);
+                return courses;
             }
         }
 
@@ -81,7 +81,7 @@ namespace AlicanteWeb.Data
             {
                 const string query = @"SELECT TournamentId, TournamentName, Active, " +
                     "                   MatchId, MatchDate, CourseId, CourseName, " +
-                                        "CourseRating, Slope, Par " +
+                                        "CourseRating, Slope, Par, @Published " +
                                         "FROM al.vMatch " +
                                         "where Active = 1 " +
                                         "and MatchId = @matchId";
@@ -96,7 +96,7 @@ namespace AlicanteWeb.Data
             using (IDbConnection db = CreateConnection())
             {
                 const string query = @"SELECT TournamentId, TournamentName, Active, " +
-                    "                   MatchId, MatchDate, CourseId, CourseName, " +
+                    "                   MatchId, MatchDate, CourseId, CourseName, Published, " +
                                         "CourseRating, Slope, Par " +
                                         "FROM al.vMatch " +
                                         "where Active = 1 " +
@@ -108,7 +108,7 @@ namespace AlicanteWeb.Data
         }
         public async Task<MatchModel> UpsertMatch(MatchModel match)
         {
-            var sql = "EXEC al.UpsertMatch @MatchId, @MatchDate, @CourseId, @TournamentId";
+            var sql = "EXEC al.UpsertMatch @MatchId, @MatchDate, @CourseId, @TournamentId, @Published";
             using (var connection = CreateConnection())
             {
                 var result = await connection.QueryAsync<MatchModel>(sql, new
@@ -116,7 +116,8 @@ namespace AlicanteWeb.Data
                     match.MatchId,
                     match.MatchDate,
                     match.CourseId,
-                    match.TournamentId
+                    match.TournamentId,
+                    match.Published
                 });
                 return result!.SingleOrDefault<MatchModel>();
             }
@@ -277,14 +278,14 @@ namespace AlicanteWeb.Data
         {
             using (IDbConnection db = CreateConnection())
             {
-                const string getQuery = "SELECT ResultId,PlayerId,MatchId,Hcp,Score,Birdies FROM al.Result WHERE ResultId = @id";
+                const string getQuery = "SELECT ResultId,PlayerId,MatchId,Hcp,Score,Birdies,Price FROM al.Result WHERE ResultId = @id";
                 return await db.QuerySingleAsync<ResultModel>(getQuery, new { id });
             }
         }
         
         public async Task<ResultModel> UpsertResult(ResultModel model)
         {
-            var sql = "EXEC al.UpsertResult @PlayerId, @MatchId, @Hcp, @Score, @Birdies, @Par3";
+            var sql = "EXEC al.UpsertResult @PlayerId, @MatchId, @Hcp, @Score, @Birdies, @Par3, @Price";
             using (var connection = CreateConnection())
             {
                 var result = await connection.QuerySingleAsync<ResultModel>(sql, new
@@ -294,7 +295,8 @@ namespace AlicanteWeb.Data
                     model.Hcp,
                     model.Score,
                     model.Birdies,
-                    model.Par3
+                    model.Par3,
+                    model.Price
                 });
                 return result;
             }
@@ -305,7 +307,7 @@ namespace AlicanteWeb.Data
             var sql = @"SELECT 
                 TournamentId, TournamentName, Active, MatchId, MatchDate, 
                 CourseId, CourseName, CourseRating, Slope, Hcp, Score, 
-                Birdies, PlayerId, PlayerName, HcpIndex
+                Birdies, PlayerId, PlayerName, HcpIndex, Price
             FROM al.vResult order by PlayerName";
 
             using (IDbConnection db = CreateConnection())
@@ -319,7 +321,7 @@ namespace AlicanteWeb.Data
             var sql = @"SELECT 
                 ResultId, TournamentId, TournamentName, Active, MatchId, MatchDate, 
                 CourseId, CourseName, CourseRating, Slope, Hcp, Score, 
-                Birdies, PlayerId, PlayerName, HcpIndex, Par3,
+                Birdies, PlayerId, PlayerName, HcpIndex, Par3, Price,
                 Rank() over (partition by TournamentId order by MatchDate) as matchRank
                 FROM al.vResult
                 WHERE MatchId = @matchId
@@ -334,13 +336,15 @@ namespace AlicanteWeb.Data
         public async Task<IEnumerable<MatchResultViewModel>> TournamentResult(int tournamentId)
         {
             var sql = @" SELECT TournamentId, CourseName, MatchId, MatchDate, PlayerName, PlayerId,
-                Hcp, Score, Score-Hcp as Netto, Birdies, HcpIndex, Par3
+                Hcp, Score, Score-Hcp as Netto, Birdies, HcpIndex, Par3, Price, Published
                 FROM al.vResult WHERE TournamentId = @tournamentId
                 union
                 SELECT TournamentId, 'Total', -1, null, PlayerName, PlayerId, 
-                null, sum(Score), sum(Score-Hcp) as Netto,  sum(Birdies), null, sum(Par3)
+                null, sum(Score), sum(Score-Hcp) as Netto,  sum(Birdies), null, sum(Par3), sum(Price) as Price
+                , Published
                 FROM al.vResult 
-				group by TournamentId, PlayerName, PlayerId 
+                where Published = 1
+				group by TournamentId, PlayerName, PlayerId, Published 
 				HAVING TournamentId = @tournamentId";
 
             using (IDbConnection db = CreateConnection())

@@ -44,6 +44,16 @@ else
                 </EditTemplate>
             </RadzenDataGridColumn>
 
+            <RadzenDataGridColumn Property="@nameof(MatchViewModel.Published)" Title="Offentlig" TextAlign="TextAlign.Center" CssClass="col">
+                <Template Context="match">
+                    <RadzenCheckBox ReadOnly @bind-Value="match.Published" Name="CheckBox1" />
+                </Template>
+                <EditTemplate Context="match">
+                        <RadzenCheckBox @bind-Value="match.Published" Name="CheckBox1" />
+                        <RadzenLabel Text="Offentlig" Component="CheckBox1" class="rz-ms-2" />
+                </EditTemplate>
+            </RadzenDataGridColumn>
+
             <RadzenDataGridColumn Context="match" Width="160px" TextAlign="TextAlign.Right" Frozen="true" FrozenPosition="FrozenColumnPosition.Right">
                 <Template Context="match">
                     <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="Radzen.ButtonSize.Medium" Click="@(args => EditRow(match))" @onclick:stopPropagation="true">
@@ -116,6 +126,7 @@ else
             MatchId = match.MatchId,
             CourseId = match.CourseId,
             MatchDate = match.MatchDate,
+            Published = match.Published,
             TournamentId = tournament.TournamentId
         };
         try { 

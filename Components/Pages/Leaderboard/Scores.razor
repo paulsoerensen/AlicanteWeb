@@ -1,4 +1,4 @@
-﻿@page "/leaderboard/scores"
+﻿@page "/leaderboard"
 @using Newtonsoft.Json
 @rendermode InteractiveServer
 
@@ -22,9 +22,9 @@ else
                                 <RadzenDataGrid ColumnWidth="50px" Data="@scores.Where(m => m.MatchId == match.MatchId)" TItem="MatchResultViewModel">
                                     <Columns>
                                         <RadzenDataGridColumn Property="@nameof(MatchResultViewModel.PlayerName)" Title="Spiller" MinWidth="150px" />
-                                        <RadzenDataGridColumn Property="@nameof(MatchResultViewModel.Score)" Title="Brutto" />
-                                        <RadzenDataGridColumn Property="@nameof(MatchResultViewModel.Hcp)" Title="ATS" />
-                                        <RadzenDataGridColumn Property="@nameof(MatchResultViewModel.Netto)" Title="Netto" />
+                                                <RadzenDataGridColumn Property="@nameof(MatchResultViewModel.Score)" Title="Brutto" TextAlign="TextAlign.Center" />
+                                                <RadzenDataGridColumn Property="@nameof(MatchResultViewModel.Hcp)" Title="ATS" TextAlign="TextAlign.Center" />
+                                                <RadzenDataGridColumn Property="@nameof(MatchResultViewModel.Netto)" Title="Netto" TextAlign="TextAlign.Center" />
                                     </Columns>
                                 </RadzenDataGrid>
                             </RadzenTabsItem>
@@ -41,7 +41,7 @@ else
                                 <RadzenDataGrid ColumnWidth="50px" Data="@par3s.Where(m => m.MatchId == match.MatchId)" TItem="MatchResultViewModel">
                                     <Columns>
                                         <RadzenDataGridColumn Property="@nameof(MatchResultViewModel.PlayerName)" Title="Spiller" />
-                                        <RadzenDataGridColumn Property="@nameof(MatchResultViewModel.Par3)" Title="Par 3" />
+                                                <RadzenDataGridColumn Property="@nameof(MatchResultViewModel.Par3)" Title="Par 3" TextAlign="TextAlign.Center" />
                                     </Columns>
                                 </RadzenDataGrid>
                             </RadzenTabsItem>
@@ -58,7 +58,24 @@ else
                                 <RadzenDataGrid ColumnWidth="50px" Data="@birdies.Where(m => m.MatchId == match.MatchId)" TItem="MatchResultViewModel">
                                     <Columns>
                                         <RadzenDataGridColumn Property="@nameof(MatchResultViewModel.PlayerName)" Title="Spiller" />
-                                        <RadzenDataGridColumn Property="@nameof(MatchResultViewModel.Birdies)" Title="Birdies" />
+                                        <RadzenDataGridColumn Property="@nameof(MatchResultViewModel.Birdies)" Title="Birdies" TextAlign="TextAlign.Center" />
+                                    </Columns>
+                                </RadzenDataGrid>
+                            </RadzenTabsItem>
+                        }
+                    </Tabs>
+                </RadzenTabs>
+            </RadzenTabsItem>
+            <RadzenTabsItem Text="Gryn">
+                <RadzenTabs TabPosition="TabPosition.Top" RenderMode="TabRenderMode.Client">
+                    <Tabs>
+                        @foreach (var match in matches)
+                        {
+                            <RadzenTabsItem Text="@match.CourseName">
+                                <RadzenDataGrid ColumnWidth="50px" Data="@prices.Where(m => m.MatchId == match.MatchId)" TItem="MatchResultViewModel">
+                                    <Columns>
+                                        <RadzenDataGridColumn Property="@nameof(MatchResultViewModel.PlayerName)" Title="Spiller" />
+                                                <RadzenDataGridColumn Property="@nameof(MatchResultViewModel.Price)" Title="Kr." TextAlign="TextAlign.Center" />
                                     </Columns>
                                 </RadzenDataGrid>
                             </RadzenTabsItem>
@@ -82,6 +99,7 @@ else
     public IEnumerable<MatchResultViewModel> scores { get; set; }
     public IEnumerable<MatchResultViewModel> birdies { get; set; }
     public IEnumerable<MatchResultViewModel> par3s { get; set; }
+    public IEnumerable<MatchResultViewModel> prices { get; set; }
     public IEnumerable<MatchHeader> matches { get; set; }
 
     public TournamentModel ActiveTournament { get; set; }
@@ -100,6 +118,7 @@ else
             scores = results.OrderBy(m => m.Netto).ThenBy(m => m.HcpIndex);
             birdies = results.OrderByDescending(m => m.Birdies).ThenBy(m => m.HcpIndex);
             par3s = results.OrderBy(m => m.Par3).ThenBy(m => m.HcpIndex);
+            prices = results.OrderByDescending(m => m.Price).ThenBy(m => m.HcpIndex);
             matches = results
                 .GroupBy(m => new { m.MatchDate, m.CourseName })
                 .OrderBy(g => g.Min(m => m.MatchRank))

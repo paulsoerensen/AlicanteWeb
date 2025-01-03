@@ -74,6 +74,15 @@
             </EditTemplate>
         </RadzenDataGridColumn>
 
+        <RadzenDataGridColumn Property="@nameof(ResultViewModel.Price)" Title="Kr." TextAlign="TextAlign.Center" CssClass="col">
+            <Template Context="result">
+                @result.Price
+            </Template>
+            <EditTemplate Context="result">
+                <RadzenNumeric @bind-Value="result.Price" Style="width:100%" InputAttributes="@(new Dictionary<string,object>(){ { "aria-label", "Total på par 3" }})" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+
         <RadzenDataGridColumn Context="result" Width="160px" TextAlign="TextAlign.Right" Frozen="true" FrozenPosition="FrozenColumnPosition.Right">
             <Template Context="result">
                 <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="Radzen.ButtonSize.Medium" Click="@(args => EditRow(result))" @onclick:stopPropagation="true">
@@ -94,7 +103,6 @@
 </RadzenDataGrid>
     </RadzenCard>
 </BSContainer>
-<AppModal/>
 <ConfirmDialog @ref="dialog" />
 
 @code
@@ -149,8 +157,9 @@
             Birdies = result.Birdies,
             Hcp = result.Hcp,
             Par3 = result.Par3,
-            Score = result.Score
-        };
+            Score = result.Score,
+            Price = result.Price
+            };
         try
         {
             var res = await _repo.UpsertResult(model);
