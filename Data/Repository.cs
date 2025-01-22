@@ -336,11 +336,11 @@ namespace AlicanteWeb.Data
         public async Task<IEnumerable<MatchResultViewModel>> TournamentResult(int tournamentId)
         {
             var sql = @" SELECT TournamentId, CourseName, MatchId, MatchDate, PlayerName, PlayerId,
-                Hcp, Score, Score-Hcp as Netto, Birdies, HcpIndex, Par3, Price, Published
+                Hcp, Score, Netto, Birdies, HcpIndex, Par3, Price, Published
                 FROM al.vResult WHERE TournamentId = @tournamentId
                 union
-                SELECT TournamentId, 'Total', -1, null, PlayerName, PlayerId, 
-                null, sum(Score), sum(Score-Hcp) as Netto,  sum(Birdies), null, sum(Par3), sum(Price) as Price
+                SELECT TournamentId, 'Total', -1, '2099-01-01', PlayerName, PlayerId, 
+                null, sum(Score), sum(Netto),  sum(Birdies), null, sum(Par3), sum(Price) as Price
                 , Published
                 FROM al.vResult 
                 where Published = 1

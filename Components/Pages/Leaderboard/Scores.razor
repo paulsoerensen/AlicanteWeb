@@ -127,7 +127,8 @@ else
                         MatchId = g.First().MatchId,
                         MatchDate = g.Key.MatchDate,
                         CourseName = g.Key.CourseName
-                    }).ToList();
+                    })
+                    .OrderBy(m => m.MatchDate).ToList();
         }
     }
 
