@@ -5,5 +5,8 @@
         public int TournamentId { get; set; }
         public string TournamentName { get; set; }
         public bool Active { get; set; } = false;
+        public int BirdieAmount { get; set; }
+        public int Par3Amount { get; set; }
+        public int NettoAmount { get; set; }
     }
 }

@@ -23,6 +23,9 @@ else
         <Columns>
 
             <RadzenDataGridColumn Property="@nameof(PlayerModel.PlayerName)" Title="Navn">
+                        <Template Context="player">
+                            @String.Format("{0} - {1:F1}",player.PlayerName, player.HcpIndex)
+                        </Template>
                 <EditTemplate Context="player">
                     <RadzenTextBox @bind-Value="player.PlayerName" Style="width:200px; display: block" Name="PlayerName" aria-label="Angiv et navn" />
                     <RadzenRequiredValidator Text="Navn skal angives" Component="PlayerName" Popup="true" />
@@ -35,6 +38,15 @@ else
                 </Template>
                 <EditTemplate Context="player">
                     <RadzenNumeric @bind-Value="player.HcpIndex" Style="width:100%" InputAttributes="@(new Dictionary<string,object>(){ { "aria-label", "Angiv spillers hcp index" }})" />
+                </EditTemplate>
+            </RadzenDataGridColumn>
+
+            <RadzenDataGridColumn Property="@nameof(PlayerModel.Championships)" Title="Championships" TextAlign="TextAlign.Center" CssClass="col">
+                <Template Context="player">
+                    @String.Format("{0:N0}", player.Championships)
+                </Template>
+                <EditTemplate Context="player">
+                    <RadzenNumeric @bind-Value="player.Championships" Style="width:100%" InputAttributes="@(new Dictionary<string, object>() { { "aria-label", "Turnerings sejre" } })" />
                 </EditTemplate>
             </RadzenDataGridColumn>
 

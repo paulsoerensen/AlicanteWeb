@@ -5,6 +5,6 @@
         public int PlayerId { get; set; }
         public string PlayerName { get; set; }
         public decimal? HcpIndex { get; set; }
-
+        public int? Championships { get; set; }
     }
 }

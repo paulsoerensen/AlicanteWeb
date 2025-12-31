@@ -25,7 +25,7 @@
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-        ActiveTournament = await _repo.GetAciveTournament();
+        ActiveTournament = await _repo.GetActiveTournament();
         if (ActiveTournament == null)
         {
             return;

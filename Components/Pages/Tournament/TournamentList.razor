@@ -33,8 +33,26 @@ else
         <Columns>
             <RadzenDataGridColumn Property="@nameof(TournamentModel.TournamentName)" Title="Turnering">
                 <EditTemplate Context="tournament">
-                    <RadzenTextBox @bind-Value="tournament.TournamentName" Style="width:200px; display: block" Name="ShipName" aria-label="Angiv et navn" />
+                            <RadzenTextBox @bind-Value="tournament.TournamentName" Style="width:200px; display: block" Name="TournamentName" aria-label="Angiv et navn" />
                     <RadzenRequiredValidator Text="Navn skal angives" Component="TournamentName" Popup="true" />
+                </EditTemplate>
+            </RadzenDataGridColumn>
+
+            <RadzenDataGridColumn Property="@nameof(TournamentModel.BirdieAmount)" Title="Birdie beløb">
+                <EditTemplate Context="tournament">
+                    <RadzenNumeric @bind-Value="tournament.BirdieAmount" Style="width:200px; display: block" Name="BirdieAmount"/>
+                </EditTemplate>
+            </RadzenDataGridColumn>
+
+            <RadzenDataGridColumn Property="@nameof(TournamentModel.Par3Amount)" Title="Par3 beløb">
+                <EditTemplate Context="tournament">
+                    <RadzenNumeric @bind-Value="tournament.Par3Amount" Style="width:200px; display: block" Name="Par3Amount" />
+                </EditTemplate>
+            </RadzenDataGridColumn>
+
+            <RadzenDataGridColumn Property="@nameof(TournamentModel.NettoAmount)" Title="Netto beløb">
+                <EditTemplate Context="tournament">
+                    <RadzenNumeric @bind-Value="tournament.NettoAmount" Style="width:200px; display: block" Name="NettoAmount" />
                 </EditTemplate>
             </RadzenDataGridColumn>
 

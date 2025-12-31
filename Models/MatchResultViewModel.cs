@@ -14,8 +14,12 @@
 
         public int Birdies { get; set; }
         public int Par3 { get; set; }
+        public decimal ScorePrice { get; set; } = 0.0m;
+        public decimal BirdiePrice { get; set; } = 0.0m;
+        public decimal Par3Price { get; set; } = 0.0m;
         public decimal Price { get; set; } = 0.0m;
         public string PlayerName { get; set; }
         public decimal HcpIndex { get; set; }
+        public int Championships { get; set; } = 0;
     }
 }

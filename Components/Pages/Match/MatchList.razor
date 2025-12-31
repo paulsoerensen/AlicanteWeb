@@ -97,7 +97,7 @@ else
     {
         await base.OnInitializedAsync();
         courses = await _repo.GetAllCourses();
-        tournament = await _repo.GetAciveTournament();
+        tournament = await _repo.GetActiveTournament();
         await LoadData();
     }
 

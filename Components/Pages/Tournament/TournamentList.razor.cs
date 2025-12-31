@@ -112,12 +112,7 @@ public partial class TournamentList
 
     async Task ChangeActive()
     {
-        //var res = await http.PostAsJsonAsync("/api/Tournament/active", activeId);
-        //if (res!.IsSuccessStatusCode)
-        //{
-        //    _appState.TournamentId = activeId;
-        //    ToastService.Notify(new(ToastType.Success, "Turneringen er nu aktivt"));
-        //}
+        await _repo.SetActiveTournament(activeId);
     }
 
     protected async Task LoadData()
