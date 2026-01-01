@@ -21,6 +21,10 @@
         public decimal ScorePrice { get; set; } = 0.0m;
         public decimal BirdiePrice { get; set; } = 0.0m;
         public decimal Par3Price { get; set; } = 0.0m;
+        public decimal TotalPrice => ScorePrice + BirdiePrice + Par3Price;
+        /// <summary>
+        /// Brians registrede
+        /// </summary>
         public decimal Price { get; set; } = 0.0m;
         public int PlayerId { get; set; } = 0;
         public string PlayerName { get; set; }

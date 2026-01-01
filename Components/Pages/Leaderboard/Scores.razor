@@ -1,10 +1,19 @@
 ﻿@page "/leaderboard"
 @using Newtonsoft.Json
-@rendermode InteractiveServer
+@rendermode InteractiveServer 
 
 
 <BSContainer class="content pb-5">
     <RadzenCard>
+
+    <RadzenStack Orientation="Radzen.Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem" class="rz-p-4 rz-mb-6 rz-border-radius-1" Style="border: var(--rz-grid-cell-border);">
+        <RadzenLabel Text="Turnering:" Component="DropDownBindValue" />
+        <RadzenDropDown Style="width: 100%; max-width: 200px;" TValue="int" @bind-Value="tournamentId" Placeholder="Vælg turnering" 
+                AllowFiltering="true" Data="@(tournaments)" TextProperty="@nameof(TournamentModel.TournamentName)" 
+                ValueProperty="@nameof(TournamentModel.TournamentId)" Name="DropDownBindValue"
+                Change="() => ChangeActive()" />
+    </RadzenStack>
+
 @if (matches == null)
 {
     <p>Henter ...</p>
@@ -111,7 +120,7 @@ else
                                                 }
                                             </Template>
                                         </RadzenDataGridColumn>
-                                        <RadzenDataGridColumn Property="@nameof(MatchResultViewModel.Price)" Title="Kr." TextAlign="TextAlign.Center" FormatString="{0:0}" />
+                                        <RadzenDataGridColumn Property="@nameof(MatchResultViewModel.TotalPrice)" Title="Kr." TextAlign="TextAlign.Center" FormatString="{0:0}" />
                                     </Columns>
                                 </RadzenDataGrid>
                             </RadzenTabsItem>
@@ -138,17 +147,25 @@ else
     public IEnumerable<MatchResultViewModel> prices { get; set; }
     public IEnumerable<MatchHeader> matches { get; set; }
 
-    public TournamentModel ActiveTournament { get; set; }
+    public int tournamentId { get; set; } = -1;
+    public IEnumerable<TournamentModel> tournaments { get; set; } = default!;
 
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-        ActiveTournament = await _repo.GetActiveTournament();
-        if (ActiveTournament == null)
+        tournaments = await _repo.GetTournaments();
+        tournamentId = tournaments.Where(x => x.Active == true).Select(x => x.TournamentId).SingleOrDefault();
+        await LoadResultsAsync();
+    }
+
+    protected async Task LoadResultsAsync()
+    {
+        if (tournamentId < 0)
         {
             return;
         }
-        var results = await _repo.TournamentResult(ActiveTournament.TournamentId);
+
+        var results = await _repo.TournamentResult(tournamentId);
         if (results != null)
         {
             scores = results.OrderBy(m => m.Netto).ThenBy(m => m.HcpIndex);
@@ -166,6 +183,11 @@ else
                     })
                     .OrderBy(m => m.MatchDate).ToList();
         }
+        StateHasChanged();
     }
 
+    async Task ChangeActive()
+    {
+        await LoadResultsAsync();
+    }
 }

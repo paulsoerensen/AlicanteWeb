@@ -110,7 +110,13 @@
             </EditTemplate>
         </RadzenDataGridColumn>
 
-        <RadzenDataGridColumn Property="@nameof(ResultViewModel.Price)" Title="Kr." TextAlign="TextAlign.Center" CssClass="col">
+        <RadzenDataGridColumn Property="@nameof(ResultViewModel.TotalPrice)" Title="Total Kr." TextAlign="TextAlign.Center" CssClass="col">
+            <Template Context="result">
+                @((int)(result.TotalPrice))
+            </Template>
+        </RadzenDataGridColumn>
+
+@*         <RadzenDataGridColumn Property="@nameof(ResultViewModel.Price)" Title="Kr." TextAlign="TextAlign.Center" CssClass="col">
             <Template Context="result">
                 @((int)result.Price)
             </Template>
@@ -118,7 +124,7 @@
                 <RadzenNumeric @bind-Value="result.Price" Style="width:100%" InputAttributes="@(new Dictionary<string,object>(){ { "aria-label", "Total på par 3" }})" />
             </EditTemplate>
         </RadzenDataGridColumn>
-
+ *@
         <RadzenDataGridColumn Context="result" Width="160px" TextAlign="TextAlign.Right" Frozen="true" FrozenPosition="FrozenColumnPosition.Right">
             <Template Context="result">
                 <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="Radzen.ButtonSize.Medium" Click="@(args => EditRow(result))" @onclick:stopPropagation="true">

@@ -6,7 +6,7 @@
     <div class="container">
         @if (ActiveTournament == null) 
         {
-            <a href="#" class="navbar-brand"><span class="text-danger">Turnering</span></a>
+            <a href="#" class="navbar-brand"><span class="text-danger">Alicante</span></a>
         } 
         else
         {
@@ -34,24 +34,24 @@
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-        ActiveTournament = await _repo.GetActiveTournament();
-        if (ActiveTournament == null)
-        {
-            return;
-        }
-        var results = await _repo.TournamentResult(ActiveTournament.TournamentId);
-        if (results != null)
-        {
-            matches = results
-                .GroupBy(m => new { m.MatchDate, m.CourseName })
-                .OrderBy(g => g.Min(m => m.MatchRank))
-                .Select(g => new MatchHeader
-                    {
-                        MatchId = g.First().MatchId,
-                        MatchDate = g.Key.MatchDate,
-                        CourseName = g.Key.CourseName
-                    }).ToList();
-        }
+        // ActiveTournament = await _repo.GetActiveTournament();
+        // if (ActiveTournament == null)
+        // {
+        //     return;
+        // }
+        // var results = await _repo.TournamentResult(ActiveTournament.TournamentId);
+        // if (results != null)
+        // {
+        //     matches = results
+        //         .GroupBy(m => new { m.MatchDate, m.CourseName })
+        //         .OrderBy(g => g.Min(m => m.MatchRank))
+        //         .Select(g => new MatchHeader
+        //             {
+        //                 MatchId = g.First().MatchId,
+        //                 MatchDate = g.Key.MatchDate,
+        //                 CourseName = g.Key.CourseName
+        //             }).ToList();
+        // }
         currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
         NavigationManager.LocationChanged += OnLocationChanged;
     }
