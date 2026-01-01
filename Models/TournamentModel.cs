@@ -8,5 +8,6 @@
         public int BirdieAmount { get; set; }
         public int Par3Amount { get; set; }
         public int NettoAmount { get; set; }
+        public int Winners { get; set; }
     }
 }

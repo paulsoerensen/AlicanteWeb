@@ -38,6 +38,12 @@ else
                 </EditTemplate>
             </RadzenDataGridColumn>
 
+            <RadzenDataGridColumn Property="@nameof(TournamentModel.Winners)" Title="Del i pengene">
+                <EditTemplate Context="tournament">
+                    <RadzenNumeric @bind-Value="tournament.Winners" Style="width:200px; display: block" Name="Winners" />
+                </EditTemplate>
+            </RadzenDataGridColumn>
+
             <RadzenDataGridColumn Property="@nameof(TournamentModel.BirdieAmount)" Title="Birdie beløb">
                 <EditTemplate Context="tournament">
                     <RadzenNumeric @bind-Value="tournament.BirdieAmount" Style="width:200px; display: block" Name="BirdieAmount"/>

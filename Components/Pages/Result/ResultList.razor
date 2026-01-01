@@ -19,7 +19,7 @@
 
 <RadzenDataGrid @ref="resultGrid" AllowAlternatingRows="false" EditMode="DataGridEditMode.Single"
                         Data="@results" TItem="ResultViewModel" RowUpdate="@OnUpdateRow" CellRender="@CellRender"
-                RowCreate="@OnCreateRow">
+                        AllowSorting="true" RowCreate="@OnCreateRow">
     <HeaderTemplate>
         <RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle" Text="Nyt resultat" Click="@InsertRow" Disabled="@(Editing || matchId == 0)" />
         <RadzenButton ButtonStyle="ButtonStyle.Primary" Icon="add_circle" Text="Fordel birdie penge" Click="@CalcBirdiePrices" Disabled="@(Editing || matchId == 0)" />
@@ -55,7 +55,7 @@
                 @result.Birdies
             </Template>
             <EditTemplate Context="result">
-                <RadzenNumeric @bind-Value="result.Birdies" Style="width:100%" InputAttributes="@(new Dictionary<string,object>(){ { "aria-label", "Brutto" }})" />
+                <RadzenNumeric @bind-Value="result.Birdies" Style="width:100%" InputAttributes="@(new Dictionary<string,object>(){ { "aria-label", "Birdies" }})" />
             </EditTemplate>
         </RadzenDataGridColumn>
 
@@ -68,18 +68,24 @@
             </EditTemplate>
         </RadzenDataGridColumn>
 
-        <RadzenDataGridColumn Property="@nameof(ResultViewModel.Score)" Title="Score" TextAlign="TextAlign.Center" CssClass="col">
+        <RadzenDataGridColumn Property="@nameof(ResultViewModel.Score)" Title="Brutto" TextAlign="TextAlign.Center" CssClass="col">
             <Template Context="result">
                 @result.Score
             </Template>
             <EditTemplate Context="result">
-                <RadzenNumeric @bind-Value="result.Score" Style="width:100%" InputAttributes="@(new Dictionary<string,object>(){ { "aria-label", "Brutto" }})" />
+                <RadzenNumeric @bind-Value="result.Score" Style="width:100%" InputAttributes="@(new Dictionary<string, object>() { { "aria-label", "Brutto" } })" />
             </EditTemplate>
+        </RadzenDataGridColumn>
+    
+        <RadzenDataGridColumn Property="@nameof(ResultViewModel.Netto)" Title="Netto" TextAlign="TextAlign.Center" CssClass="col">
+            <Template Context="result">
+                @result.Netto
+            </Template>
         </RadzenDataGridColumn>
 
         <RadzenDataGridColumn Property="@nameof(ResultViewModel.BirdiePrice)" Title="Birdie Dkr" TextAlign="TextAlign.Center" CssClass="col">
             <Template Context="result">
-                @result.BirdiePrice
+                @((int)result.BirdiePrice)
             </Template>
             <EditTemplate Context="result">
                 <RadzenNumeric @bind-Value="result.BirdiePrice" Style="width:100%" InputAttributes="@(new Dictionary<string,object>(){ { "aria-label", "Brutto" }})" />
@@ -88,7 +94,7 @@
 
         <RadzenDataGridColumn Property="@nameof(ResultViewModel.Par3Price)" Title="Par 3 Dkr" TextAlign="TextAlign.Center" CssClass="col">
             <Template Context="result">
-                @result.Par3Price
+                @((int)result.Par3Price)
             </Template>
             <EditTemplate Context="result">
                 <RadzenNumeric @bind-Value="result.Par3Price" Style="width:100%" InputAttributes="@(new Dictionary<string,object>(){ { "aria-label", "Gryn på par 3" }})" />
@@ -97,7 +103,7 @@
 
         <RadzenDataGridColumn Property="@nameof(ResultViewModel.ScorePrice)" Title="Score Dkr" TextAlign="TextAlign.Center" CssClass="col">
             <Template Context="result">
-                @result.ScorePrice
+                @((int)result.ScorePrice)
             </Template>
             <EditTemplate Context="result">
                 <RadzenNumeric @bind-Value="result.ScorePrice" Style="width:100%" InputAttributes="@(new Dictionary<string, object>() { { "aria-label", "Netto gryn" } })" />
@@ -106,7 +112,7 @@
 
         <RadzenDataGridColumn Property="@nameof(ResultViewModel.Price)" Title="Kr." TextAlign="TextAlign.Center" CssClass="col">
             <Template Context="result">
-                @result.Price
+                @((int)result.Price)
             </Template>
             <EditTemplate Context="result">
                 <RadzenNumeric @bind-Value="result.Price" Style="width:100%" InputAttributes="@(new Dictionary<string,object>(){ { "aria-label", "Total på par 3" }})" />
@@ -166,12 +172,12 @@
     {
         if (args.Column.Property == "BirdiePrice")
         {
-            args.Attributes.Add("style", $"background-color: {(args.Data.BirdiePrice > 0 ? "var(--rz-info)" : "var(--rz-base-background-color)")};");
+            args.Attributes.Add("style", $"background-color: {(args.Data.BirdiePrice > 0 ? "var(--rz-primary)" : "var(--rz-base-background-color)")};");
             args.Attributes.Add("class", args.Data.BirdiePrice > 0 ? "my-class" : "my-other-class");
         }
         if (args.Column.Property == "Par3Price")
         {
-            args.Attributes.Add("style", $"background-color: {(args.Data.Par3Price > 0 ? "var(--rz-success)" : "var(--rz-base-background-color)")};");
+            args.Attributes.Add("style", $"background-color: {(args.Data.Par3Price > 0 ? "var(--rz-secondary)" : "var(--rz-base-background-color)")};");
             args.Attributes.Add("class", args.Data.Par3Price > 0 ? "my-class" : "my-other-class");
         }
         if (args.Column.Property == "ScorePrice")
@@ -181,7 +187,7 @@
         }
         if (args.Column.Property == "Price")
         {
-            args.Attributes.Add("style", $"background-color: {(args.Data.Price > 0 ? "var(--rz-info)" : "var(--rz-base-background-color)")};");
+            args.Attributes.Add("style", $"background-color: {(args.Data.Price > 0 ? "var(--rz-warning)" : "var(--rz-base-background-color)")};");
             args.Attributes.Add("class", args.Data.Price > 0 ? "my-class" : "my-other-class");
         }
     }
@@ -210,7 +216,7 @@
             Birdies = result.Birdies,
             Hcp = result.Hcp,
             Par3 = result.Par3,
-            Score = result.Score,
+            Score = result.Netto,
             Price = result.Price,
             Par3Price = result.Par3Price,
             ScorePrice = result.ScorePrice,

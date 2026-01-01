@@ -15,6 +15,7 @@
         public int Hcp { get; set; }
         public int Par { get; set; }
         public int Score { get; set; }
+        public int Netto => Score - Hcp;
         public int Birdies { get; set; }
         public int Par3 { get; set; }
         public decimal ScorePrice { get; set; } = 0.0m;

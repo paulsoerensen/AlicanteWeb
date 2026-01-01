@@ -31,7 +31,7 @@ else
                                             </Template>
                                         </RadzenDataGridColumn>
                                         <RadzenDataGridColumn Property="@nameof(MatchResultViewModel.Par3)" Title="Par 3" TextAlign="TextAlign.Center" />
-                                        <RadzenDataGridColumn Property="@nameof(MatchResultViewModel.Par3Price)" Title="Dkr" TextAlign="TextAlign.Center" />
+                                        <RadzenDataGridColumn Property="@nameof(MatchResultViewModel.Par3Price)" Title="Dkr" TextAlign="TextAlign.Center" FormatString="{0:0}" />
                                     </Columns>
                                 </RadzenDataGrid>
                             </RadzenTabsItem>
@@ -57,7 +57,7 @@ else
                                             </Template>
                                         </RadzenDataGridColumn>
                                         <RadzenDataGridColumn Property="@nameof(MatchResultViewModel.Birdies)" Title="Birdies" TextAlign="TextAlign.Center" />
-                                        <RadzenDataGridColumn Property="@nameof(MatchResultViewModel.BirdiePrice)" Title="Dkr" TextAlign="TextAlign.Center" />
+                                        <RadzenDataGridColumn Property="@nameof(MatchResultViewModel.BirdiePrice)" Title="Dkr" TextAlign="TextAlign.Center" FormatString="{0:0}" />
                                     </Columns>
                                 </RadzenDataGrid>
                             </RadzenTabsItem>
@@ -85,7 +85,7 @@ else
                                         <RadzenDataGridColumn Property="@nameof(MatchResultViewModel.Score)" Title="Brutto" TextAlign="TextAlign.Center" />
                                         <RadzenDataGridColumn Property="@nameof(MatchResultViewModel.Hcp)" Title="ATS" TextAlign="TextAlign.Center" />
                                         <RadzenDataGridColumn Property="@nameof(MatchResultViewModel.Netto)" Title="Netto" TextAlign="TextAlign.Center" />
-                                        <RadzenDataGridColumn Property="@nameof(MatchResultViewModel.ScorePrice)" Title="Dkr" TextAlign="TextAlign.Center" />
+                                        <RadzenDataGridColumn Property="@nameof(MatchResultViewModel.ScorePrice)" Title="Dkr" TextAlign="TextAlign.Center" FormatString="{0:0}" />
                                     </Columns>
                                 </RadzenDataGrid>
                             </RadzenTabsItem>
@@ -111,7 +111,7 @@ else
                                                 }
                                             </Template>
                                         </RadzenDataGridColumn>
-                                        <RadzenDataGridColumn Property="@nameof(MatchResultViewModel.Price)" Title="Kr." TextAlign="TextAlign.Center" />
+                                        <RadzenDataGridColumn Property="@nameof(MatchResultViewModel.Price)" Title="Kr." TextAlign="TextAlign.Center" FormatString="{0:0}" />
                                     </Columns>
                                 </RadzenDataGrid>
                             </RadzenTabsItem>

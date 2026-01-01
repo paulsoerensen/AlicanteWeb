@@ -206,7 +206,7 @@ namespace AlicanteWeb.Data
             using (IDbConnection db = CreateConnection())
             {
                 const string query = "SELECT TournamentId, TournamentName, Active" +
-                    ", BirdieAmount, Par3Amount, NettoAmount " +
+                    ", BirdieAmount, Par3Amount, NettoAmount, Winners " +
                     "FROM al.Tournament WHERE TournamentId = @tournamentId";
                 return await db.QuerySingleAsync<TournamentModel>(query, new { tournamentId });
             }
@@ -217,7 +217,7 @@ namespace AlicanteWeb.Data
             using (IDbConnection db = CreateConnection())
             {
                 const string query = "SELECT TournamentId, TournamentName, Active" +
-                    ", BirdieAmount, Par3Amount, NettoAmount " +
+                    ", BirdieAmount, Par3Amount, NettoAmount, Winners " +
                     "FROM al.Tournament";
                 var results = await db.QueryAsync<TournamentModel>(query);
                 return results;
@@ -229,7 +229,7 @@ namespace AlicanteWeb.Data
             using (IDbConnection db = CreateConnection())
             {
                 const string query = "SELECT TournamentId, TournamentName, Active" +
-                    ", BirdieAmount, Par3Amount, NettoAmount " +
+                    ", BirdieAmount, Par3Amount, NettoAmount, Winners " +
                     "FROM al.Tournament where Active=1";
                 try
                 {
@@ -247,7 +247,7 @@ namespace AlicanteWeb.Data
         public async Task<TournamentModel> UpsertTournament(TournamentModel model)
         {
             var sql = "EXEC al.UpsertTournament @TournamentId, @TournamentName, @Active, " +
-                "@BirdieAmount, @Par3Amount, @NettoAmount";
+                "@BirdieAmount, @Par3Amount, @NettoAmount, @Winners";
 
             using (var connection = CreateConnection())
             {
@@ -258,7 +258,8 @@ namespace AlicanteWeb.Data
                     model.Active,
                     model.BirdieAmount,
                     model.Par3Amount,
-                    model.NettoAmount
+                    model.NettoAmount,
+                    model.Winners
                 });
                 return result;
             }
