@@ -12,6 +12,9 @@
         {
             <a href="#" class="navbar-brand">@ActiveTournament.TournamentName<span class="text-danger"></span></a>
         }
+        <span class="ms-3 text-dark">
+            @countdownText
+        </span>
     </div>
     <ul class="navbar-nav ms-auto">
         <li class="nav-item">
@@ -30,6 +33,10 @@
     public TournamentModel ActiveTournament { get; set; }
 
     private string? currentUrl;
+    private System.Threading.Timer? timer;
+    private string countdownText = "";
+    private static readonly DateTime targetDate = new DateTime(2026, 1, 21, 8, 0, 0, DateTimeKind.Local);
+
 
     protected override async Task OnInitializedAsync()
     {
@@ -52,10 +59,33 @@
         //                 CourseName = g.Key.CourseName
         //             }).ToList();
         // }
+        UpdateCountdown();
+        timer = new System.Threading.Timer(_ =>
+        {
+            InvokeAsync(() =>
+            {
+                UpdateCountdown();
+                StateHasChanged();
+            });
+        }, null, TimeSpan.Zero, TimeSpan.FromSeconds(30));
+
         currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
         NavigationManager.LocationChanged += OnLocationChanged;
     }
     
+    private void UpdateCountdown()
+    {
+        var now = DateTime.Now;
+        var diff = targetDate - now;
+        if (diff.TotalSeconds > 0)
+        {
+            countdownText = $"{diff.Days} dage {diff.Hours} timer {diff.Minutes} minutter.";
+        }
+        else
+        {
+            countdownText = "Så er vi igang";
+        }
+    }
 
     private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
     {

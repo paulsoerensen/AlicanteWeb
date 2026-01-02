@@ -30,7 +30,7 @@ else
                             <RadzenTabsItem Text="@match.CourseName">
                                 <RadzenDataGrid ColumnWidth="50px" Data="@par3s.Where(m => m.MatchId == match.MatchId)" TItem="MatchResultViewModel">
                                     <Columns>
-                                        <RadzenDataGridColumn Property="@nameof(MatchResultViewModel.PlayerName)" Title="Spiller" MinWidth="150px">
+                                        <RadzenDataGridColumn Property="@nameof(MatchResultViewModel.PlayerName)" Title="Spiller"  Frozen="true" Width="60px" MinWidth="50px">
                                             <Template Context="data">
                                                 @data.PlayerName
                                                 @for (int i = 0; i < data.Championships; i++)
@@ -56,7 +56,7 @@ else
                             <RadzenTabsItem Text="@match.CourseName">
                                 <RadzenDataGrid ColumnWidth="50px" Data="@birdies.Where(m => m.MatchId == match.MatchId)" TItem="MatchResultViewModel">
                                     <Columns>
-                                        <RadzenDataGridColumn Property="@nameof(MatchResultViewModel.PlayerName)" Title="Spiller" MinWidth="150px">
+                                        <RadzenDataGridColumn Property="@nameof(MatchResultViewModel.PlayerName)" Title="Spiller"  Frozen="true" Width="60px" MinWidth="50px">
                                             <Template Context="data">
                                                 @data.PlayerName
                                                 @for (int i = 0; i < data.Championships; i++)
@@ -82,7 +82,7 @@ else
                             <RadzenTabsItem Text="@match.CourseName">
                                 <RadzenDataGrid ColumnWidth="50px" Data="@scores.Where(m => m.MatchId == match.MatchId)" TItem="MatchResultViewModel">
                                     <Columns>
-                                        <RadzenDataGridColumn Property="@nameof(MatchResultViewModel.PlayerName)" Title="Spiller" MinWidth="150px">
+                                        <RadzenDataGridColumn Property="@nameof(MatchResultViewModel.PlayerName)" Title="Spiller" Frozen="true" Width="60px" MinWidth="50px">
                                             <Template Context="data">
                                                 @data.PlayerName
                                                 @for (int i = 0; i < data.Championships; i++)
@@ -94,7 +94,7 @@ else
                                         <RadzenDataGridColumn Property="@nameof(MatchResultViewModel.Score)" Title="Brutto" TextAlign="TextAlign.Center" />
                                         <RadzenDataGridColumn Property="@nameof(MatchResultViewModel.Hcp)" Title="ATS" TextAlign="TextAlign.Center" />
                                         <RadzenDataGridColumn Property="@nameof(MatchResultViewModel.Netto)" Title="Netto" TextAlign="TextAlign.Center" />
-                                        <RadzenDataGridColumn Property="@nameof(MatchResultViewModel.ScorePrice)" Title="Dkr" TextAlign="TextAlign.Center" FormatString="{0:0}" />
+                                        <RadzenDataGridColumn Property="@nameof(MatchResultViewModel.ScorePrice)" Title="Dkr" TextAlign="TextAlign.Center" FormatString="{0:0}" Width="20px" />
                                     </Columns>
                                 </RadzenDataGrid>
                             </RadzenTabsItem>
@@ -111,7 +111,7 @@ else
                             <RadzenTabsItem Text="@match.CourseName">
                                 <RadzenDataGrid ColumnWidth="50px" Data="@prices.Where(m => m.MatchId == match.MatchId)" TItem="MatchResultViewModel">
                                     <Columns>
-                                        <RadzenDataGridColumn Property="@nameof(MatchResultViewModel.PlayerName)" Title="Spiller" MinWidth="150px">
+                                        <RadzenDataGridColumn Property="@nameof(MatchResultViewModel.PlayerName)" Title="Spiller" Frozen="true" Width="60px" MinWidth="50px">
                                             <Template Context="data">
                                                 @data.PlayerName
                                                 @for (int i = 0; i < data.Championships; i++)
