@@ -28,9 +28,9 @@
     </HeaderTemplate>
 
     <Columns>
-        <RadzenDataGridColumn Property="@nameof(ResultViewModel.PlayerId)" Title="Spiller" TextAlign="TextAlign.Center" CssClass="col3">
+        <RadzenDataGridColumn Property="@nameof(ResultViewModel.PlayerId)" Title="Spiller" TextAlign="TextAlign.Left" CssClass="col3">
             <Template Context="result">
-                @result.PlayerName
+                @String.Format("{0} {1:F1}", result.PlayerName, result.HcpIndex)
             </Template>
             <EditTemplate Context="result">
                 <RadzenDropDown @bind-Value="result.PlayerId" AllowClear="true" Placeholder="Vælg spiller"
@@ -222,7 +222,7 @@
             Birdies = result.Birdies,
             Hcp = result.Hcp,
             Par3 = result.Par3,
-            Score = result.Netto,
+            Score = result.Score,
             Price = result.Price,
             Par3Price = result.Par3Price,
             ScorePrice = result.ScorePrice,
