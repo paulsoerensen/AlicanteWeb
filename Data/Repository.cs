@@ -385,7 +385,8 @@ namespace AlicanteWeb.Data
             var sql = @" SELECT TournamentId, CourseName, MatchId, MatchDate, PlayerName, PlayerId,
                 Hcp, Score, Netto, Birdies, HcpIndex, Par3, Price, Published, Championships,
                 Par3Price, BirdiePrice, ScorePrice
-                FROM al.vResult WHERE TournamentId = @tournamentId
+                FROM al.vResult 
+                WHERE TournamentId = @tournamentId and Published = 1
                 union
                 SELECT TournamentId, 'Total', -1, '2099-01-01', PlayerName, PlayerId, 
                 null, sum(Score), sum(Netto),  sum(Birdies), null, sum(Par3), sum(Price) as Price
